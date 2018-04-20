@@ -20,7 +20,7 @@ void lsn5_Foreground(void);
 
 int main() {
 	//视频路径
-	string FilePath = "C:/7.mp4";
+	string FilePath = "C:/8.avi";
 	//读取视频
 	VideoCapture capture(FilePath);
 	if (!capture.isOpened()) {
@@ -34,13 +34,9 @@ int main() {
 	Mat frame;
 	Mat foreground;
 	Mat mask, f1, f2, f3, f4;
-	/*string s1 = "C:\\final\\part1\\background\\10\\";
-	string s2 = "C:\\final\\part1\\background\\19\\";
-	string s3 = "C:\\final\\part1\\background\\111\\";
-	string s4 = "C:\\final\\part1\\background\\113\\";*/
+	Mat fgimg;
 	int it = 0;
 
-	//namedWindow("Extracted Foreground");
 	Ptr<BackgroundSubtractorMOG2>bgsubstractor = createBackgroundSubtractorMOG2(500, 16, true); //混合高斯建模算法
 	bgsubstractor.dynamicCast<BackgroundSubtractor>();
 	bgsubstractor->setVarThreshold(20);
@@ -50,7 +46,12 @@ int main() {
 		{
 			break;
 		}
-		resize(frame, frame, Size(frame.cols / 2, frame.rows / 2), 0, 0, INTER_LINEAR);
+		//resize(frame, frame, Size(frame.cols * 2, frame.rows * 2), 0, 0, INTER_LINEAR);
+
+		if (fgimg.empty())
+		{
+			fgimg.create(frame.size(), frame.type());
+		}
 
 		bgsubstractor->apply(frame, mask, 0.01);
 
@@ -59,21 +60,40 @@ int main() {
 		//这两个操作就是先去噪点，再把空洞填充起来
 		morphologyEx(mask, f1, MORPH_OPEN, element);//开运算=腐蚀+膨胀
 
-													/*medianBlur(f1, f2, 9);
-													medianBlur(f1, f3, 11);*/
 		medianBlur(f1, f1, 13);
 
-		/*string name = to_string(it);
-		name += ".jpg";
-		if (it % 5 == 0) {
-		imwrite(s2 + name, f2);
-		imwrite(s3 + name, f3);
-		imwrite(s4 + name, f4);
-		}*/
+		//GaussianBlur(mask, mask, Size(5, 5), 3.5, 3.5);//高斯平滑
 		it++;
 
-		imshow("mask", f1);
-		waitKey(50);
+		//切割人体图像
+		//===== 对前景掩码做处理，过滤噪点
+		vector<vector<Point>> contours;
+		Mat contours_src = f1.clone();
+
+		//对轮廓形态处理
+		Mat ker = getStructuringElement(MORPH_RECT, Size(5, 5), Point(-1, -1));
+
+		//查找轮廓
+		findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+
+		//将查找到的轮廓绘制到掩码
+		Mat mask2(fgimg.size(), CV_8U, Scalar(0));
+		drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
+
+		//对前景掩码的再次掩码处理
+		Mat fgmask1;
+		f1.copyTo(fgmask1, mask2);
+		//imshow("mask2", mask2);
+		//===== 前景掩码处理完毕
+
+		//获取前景图像
+		fgimg = Scalar::all(0);
+		frame.copyTo(fgimg, fgmask1);
+
+		imshow("foreground", fgimg);
+		//imshow("mask", f1);
+		imshow("src",frame);
+		waitKey(100);
 		/*if (waitKey(delay) > 0)
 		stop = true;*/
 	}
