@@ -11,16 +11,16 @@
 #include <sstream>
 #include <string>
 
+#include "util.h"
+
 using namespace cv;
 using namespace std;
 
 typedef vector<Point> contour_t;
 
-void ContrastAndBright(Mat &src, Mat &dst, double alpha, double beta);//增强对比度和亮度  alpha对比度 beta亮度
-
 int main() {
 	//视频路径
-	string FilePath = "C:/8.avi";
+	string FilePath = "C:\\8.avi";
 	//读取视频
 	VideoCapture capture(FilePath);
 	if (!capture.isOpened()) {
@@ -66,10 +66,9 @@ int main() {
 		Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
 		//这两个操作就是先去噪点，再把空洞填充起来
 		morphologyEx(mask, f1, MORPH_OPEN, element);//开运算=腐蚀+膨胀
-
+		dilate(f1, f1, element);
 		medianBlur(f1, f1, 13);
 
-		//GaussianBlur(mask, mask, Size(5, 5), 3.5, 3.5);//高斯平滑
 		it++;
 
 		///////////////////////////////////////切割人体图像
@@ -99,7 +98,7 @@ int main() {
 		imshow("foreground", fgimg);
 		//imshow("mask", f1);
 		imshow("src", frame);
-		waitKey(100);
+		waitKey(150);
 		/*if (waitKey(delay) > 0)
 		stop = true;*/
 	}
@@ -107,18 +106,4 @@ int main() {
 	waitKey();
 	return 0;
 
-}
-
-void ContrastAndBright(Mat &src, Mat &dst, double alpha, double beta) {
-	// 执行变换 new_image(i,j) = alpha    * image(i,j) + beta
-	for (int y = 0; y < src.rows; y++)
-	{
-		for (int x = 0; x < src.cols; x++)
-		{
-			for (int c = 0; c < 3; c++)
-			{
-				dst.at<Vec3b>(y, x)[c] = saturate_cast<uchar>(alpha * (src.at<Vec3b>(y, x)[c]) + beta);
-			}
-		}
-	}
 }
