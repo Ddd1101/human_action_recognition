@@ -16,3 +16,9 @@ using namespace std;
 using namespace cv;
 
 void ContrastAndBright(Mat &src, Mat &dst, double alpha, double beta);//增强对比度和亮度  alpha对比度 beta亮度
+
+void srcAmend(Mat &src);
+
+void bgAmend(Mat &frame);
+
+Mat getApartFrame(Mat &src, Mat &mask);
