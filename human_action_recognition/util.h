@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 using namespace cv;
@@ -22,3 +23,10 @@ void srcAmend(Mat &src);
 void bgAmend(Mat &frame);
 
 Mat getApartFrame(Mat &src, Mat &mask);
+
+cv::Mat thinImage(const cv::Mat & src, const int maxIterations = -1);
+
+void filterOver(cv::Mat thinSrc);
+
+std::vector<cv::Point> getPoints(const cv::Mat &thinSrc, unsigned int raudis = 4, unsigned int thresholdMax = 6, unsigned int thresholdMin = 4);
+
