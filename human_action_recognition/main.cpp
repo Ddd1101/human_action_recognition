@@ -14,6 +14,7 @@
 #include <windows.h>
 //本工程
 #include "util.h"
+#include "ViBe.h"
 //#include "ImageSegmentation.h"
 //#include "BodyDetect.h"
 //#include "Body.h"
@@ -25,7 +26,7 @@ typedef vector<Point> contour_t;
 
 int main() {
 	//视频路径
-	string FilePath = "C:\\kth\\walking\\16.avi";
+	string FilePath = "C:\\kth\\running\\2.avi";
 	//读取视频
 	VideoCapture capture(FilePath);
 	if (!capture.isOpened()) {
@@ -37,6 +38,7 @@ int main() {
 	int delay = 1000 / rate;
 
 	Mat src;
+	Mat tmp;
 	Mat mask;
 	int it = 0;
 
@@ -44,34 +46,62 @@ int main() {
 	//CJcCalBody test;
 	int cutTop = 30, cutBottom = 10;
 
-
-	Ptr<BackgroundSubtractorMOG2>bgsubstractor = createBackgroundSubtractorMOG2(500, 16, false); //混合高斯建模算法
+	//自适应混合高斯背景建模的背景减除法
+	/*Ptr<BackgroundSubtractorMOG2>bgsubstractor = createBackgroundSubtractorMOG2(500, 16, false);
 	bgsubstractor.dynamicCast<BackgroundSubtractor>();
-	bgsubstractor->setVarThreshold(20);
-
+	bgsubstractor->setVarThreshold(20);*/
+	//ViBe
+	ViBe_BGS Vibe_Bgs;
+	int count = 0;
+	Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
 	while (1) {
+		count++;
 		if (!capture.read(src))
 		{
 			break;
 		}
 		DWORD startTime = GetCurrentTime();//开始时间
 
-		//Rect cutRect = Rect(0, cutTop, src.size().width, src.size().height - cutTop - cutBottom);
+		resize(src, src, Size(src.cols * 2, src.rows * 2), 0, 0, INTER_LINEAR);//图像大小变化
 
-		//src(cutRect).copyTo(src);//提取矩形子阵
-
+		//自适应混合高斯背景建模的背景减除法
 		//图像前景提取处理
-		srcAmend(src);//增加对比度
+		/*srcAmend(src);//增加对比度
 		//resize(src, src, Size(480, 270));
 		resize(src, src, Size(src.cols * 2, src.rows * 2), 0, 0, INTER_LINEAR);//图像大小变化
+
+
 		bgsubstractor->apply(src, mask, 0.01);//得到前景灰度图
-		bgAmend(mask);//灰度图形态学处理
-		imshow("test", mask);
+		bgAmend(mask);//灰度图形态学处理*/
+
+		//vibe
+		cvtColor(src, tmp, CV_BGR2GRAY);
+		if (count == 1) {
+			Vibe_Bgs.init(tmp);
+			Vibe_Bgs.processFirstFrame(tmp);
+			cout << "training gmm compelete" << endl;
+		}
+		else {
+			Vibe_Bgs.testAndUpdate(tmp);
+			mask = Vibe_Bgs.getMask();
+			morphologyEx(mask, mask, MORPH_OPEN, element);
+			//bgAmend(mask);
+			morphologyEx(mask, mask, MORPH_OPEN, element);//开运算=腐蚀+膨胀
+			morphologyEx(mask, mask, MORPH_CLOSE, element);//闭运算=膨胀+腐蚀
+			//medianBlur(mask, mask, 7);//中值滤波
+			imshow("mask", mask);
+		}
+
+
+		//imshow("gray",tmp);
+
+
+		//imshow("test", mask);
 
 		//图像细化，骨骼化    
-		cv::Mat dst = thinImage(mask);
-		filterOver(dst);//过滤细化后的图像    
-		std::vector<cv::Point> points = getPoints(dst, 6, 9, 6);//查找端点和交叉点										  
+		/*cv::Mat dst = thinImage(mask);
+		filterOver(dst);//过滤细化后的图像
+		std::vector<cv::Point> points = getPoints(dst, 6, 9, 6);//查找端点和交叉点
 		dst = dst * 255;//二值图转化成灰度图，并绘制找到的点
 		mask = mask * 255;
 		vector<cv::Point>::iterator it = points.begin();
@@ -79,7 +109,7 @@ int main() {
 		{
 			circle(dst, *it, 4, 255, 1);
 		}
-		imshow("test2", dst);
+		imshow("test2", dst);*/
 
 		//骨骼提取
 
@@ -121,7 +151,8 @@ int main() {
 		}
 
 		imshow("foreground", videoDisplay);*/
-		imshow("src", src);
+		//Mat cutImg = getApartFrame(src, mask);
+		//imshow("cutImg", cutImg);
 		waitKey(50);
 		/*if (waitKey(delay) > 0)
 		stop = true;*/

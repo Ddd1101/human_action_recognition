@@ -147,9 +147,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="util.cpp" />
+    <ClCompile Include="ViBe.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util.h" />
+    <ClInclude Include="ViBe.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

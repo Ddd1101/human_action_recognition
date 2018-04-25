@@ -17,6 +17,7 @@ void ContrastAndBright(Mat &src, Mat &dst, double alpha, double beta) {
 	}
 }
 
+
 void srcAmend(Mat &src) {
 	Mat tmp;
 
@@ -29,12 +30,12 @@ void srcAmend(Mat &src) {
 void bgAmend(Mat &mask) {
 	Mat tmp;
 	//这两个操作就是先去噪点，再把空洞填充起来
-	morphologyEx(mask, tmp, MORPH_OPEN, element);//开运算=腐蚀+膨胀
-	morphologyEx(tmp, tmp, MORPH_CLOSE, element);//闭运算=膨胀+腐蚀
+	//morphologyEx(mask, tmp, MORPH_OPEN, element);//开运算=腐蚀+膨胀
+	//morphologyEx(tmp, tmp, MORPH_CLOSE, element);//闭运算=膨胀+腐蚀
 
 	//去掉人体外的其他部分
 	vector<vector<Point>> contours;
-	Mat contours_src = tmp.clone();
+	Mat contours_src = mask.clone();
 
 	findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
 	int max = 0;
@@ -47,29 +48,40 @@ void bgAmend(Mat &mask) {
 		}
 		it++;
 	}
-	//std::cout << max << endl;
-	for (it = contours.begin(); it != contours.end();)
-	{
-		if (it->size() != max)
-		{
-			it = contours.erase(it);
-		}
-		else
-		{
-			it++;
-		}
+	std::cout << max << endl;
+	cout << contours.size() << endl;
+	if (max==0) {
+
 	}
+	else {
+		for (it = contours.begin(); it != contours.end();)
+		{
+			if (it->size() != max)
+			{
+				it = contours.erase(it);
+			}
+			else
+			{
+				it++;
+			}
+		}
+		cout << contours.size() << endl;
+		//将查找到的轮廓绘制到掩码
+		Mat mask2(tmp.size(), CV_8U, Scalar(0));
+		drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
 
-	//将查找到的轮廓绘制到掩码
-	Mat mask2(tmp.size(), CV_8U, Scalar(0));
-	drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);        
+		//medianBlur(mask2, mask2, 13);//中值滤波
 
-	medianBlur(mask2, mask2, 13);//中值滤波
-
-	//RemoveSmallRegion(tmp, tmp, 20, 1, 0);
-	mask = mask2;
-	//threshold(mask, mask, 128, 1, cv::THRESH_BINARY);
-	threshold(mask, mask, 130, 255, cv::THRESH_BINARY);//二值化处理
+		//RemoveSmallRegion(tmp, tmp, 20, 1, 0);
+		mask2.copyTo(mask);
+		if (mask.empty()==1) {
+			cout << 1 << endl;
+			int a;
+			cin >> a;
+		}
+		//threshold(mask, mask, 130, 255, cv::THRESH_BINARY);//二值化处理
+	}
+	
 }
 
 Mat getApartFrame(Mat &src, Mat &mask) {
@@ -105,7 +117,7 @@ Mat getApartFrame(Mat &src, Mat &mask) {
 cv::Mat thinImage(const cv::Mat & src, const int maxIterations)
 {
 	assert(src.type() == CV_8UC1);
-	
+
 	src /= 255;
 
 	cv::Mat dst;
@@ -282,7 +294,7 @@ void filterOver(cv::Mat thinSrc)
 * @param thresholdMin端点阈值，小于这个值为端点
 * @return 为对src细化后的输出图像,格式与src格式相同，元素中只有0与1,1代表有元素，0代表为空白
 */
-std::vector<cv::Point> getPoints(const cv::Mat &thinSrc, unsigned int raudis, unsigned int thresholdMax , unsigned int thresholdMin )
+std::vector<cv::Point> getPoints(const cv::Mat &thinSrc, unsigned int raudis, unsigned int thresholdMax, unsigned int thresholdMin)
 {
 	assert(thinSrc.type() == CV_8UC1);
 	int width = thinSrc.cols;
@@ -315,7 +327,7 @@ std::vector<cv::Point> getPoints(const cv::Mat &thinSrc, unsigned int raudis, un
 				}
 			}
 
-			if (count > thresholdMax || count<thresholdMin)
+			if (count > thresholdMax || count < thresholdMin)
 			{
 				Point point(j, i);
 				points.push_back(point);
