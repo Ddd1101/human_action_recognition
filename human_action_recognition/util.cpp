@@ -1,7 +1,8 @@
 #include "util.h"
 //#include "ImageSegmentation.h"
 
-Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
+Mat element3 = getStructuringElement(MORPH_RECT, Size(3, 3));
+Mat element5 = getStructuringElement(MORPH_RECT, Size(5, 5));
 
 void ContrastAndBright(Mat &src, Mat &dst, double alpha, double beta) {
 	// 执行变换 new_image(i,j) = alpha    * image(i,j) + beta
@@ -30,13 +31,12 @@ void srcAmend(Mat &src) {
 void bgAmend(Mat &mask) {
 	Mat tmp;
 	//这两个操作就是先去噪点，再把空洞填充起来
-	//morphologyEx(mask, tmp, MORPH_OPEN, element);//开运算=腐蚀+膨胀
-	//morphologyEx(tmp, tmp, MORPH_CLOSE, element);//闭运算=膨胀+腐蚀
-
+	//morphologyEx(mask, tmp, MORPH_OPEN, element5);//开运算=腐蚀+膨胀
+	//morphologyEx(tmp, tmp, MORPH_CLOSE, element5);//闭运算=膨胀+腐蚀
+	mask.copyTo(tmp);
 	//去掉人体外的其他部分
 	vector<vector<Point>> contours;
 	Mat contours_src = mask.clone();
-
 	findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
 	int max = 0;
 	vector<vector<Point>> ::iterator it;
@@ -48,40 +48,30 @@ void bgAmend(Mat &mask) {
 		}
 		it++;
 	}
-	std::cout << max << endl;
-	cout << contours.size() << endl;
-	if (max==0) {
-
-	}
-	else {
-		for (it = contours.begin(); it != contours.end();)
+	//std::cout << max << endl;
+	for (it = contours.begin(); it != contours.end();)
+	{
+		if (it->size() != max)
 		{
-			if (it->size() != max)
-			{
-				it = contours.erase(it);
-			}
-			else
-			{
-				it++;
-			}
+			it = contours.erase(it);
 		}
-		cout << contours.size() << endl;
-		//将查找到的轮廓绘制到掩码
-		Mat mask2(tmp.size(), CV_8U, Scalar(0));
-		drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
-
-		//medianBlur(mask2, mask2, 13);//中值滤波
-
-		//RemoveSmallRegion(tmp, tmp, 20, 1, 0);
-		mask2.copyTo(mask);
-		if (mask.empty()==1) {
-			cout << 1 << endl;
-			int a;
-			cin >> a;
+		else
+		{
+			it++;
 		}
-		//threshold(mask, mask, 130, 255, cv::THRESH_BINARY);//二值化处理
 	}
-	
+	//cout << contours.size() << endl;
+	//将查找到的轮廓绘制到掩码
+	Mat mask2(tmp.size(), CV_8U, Scalar(0));
+	drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
+
+	medianBlur(mask2, mask2, 3);//中值滤波
+
+	//RemoveSmallRegion(tmp, tmp, 20, 1, 0);
+	mask2.copyTo(mask);
+
+	threshold(mask, mask, 130, 255, cv::THRESH_BINARY);//二值化处理
+
 }
 
 Mat getApartFrame(Mat &src, Mat &mask) {
@@ -335,4 +325,27 @@ std::vector<cv::Point> getPoints(const cv::Mat &thinSrc, unsigned int raudis, un
 		}
 	}
 	return points;
+}
+
+void humanRecognition(Mat img) {
+	HOGDescriptor hog;
+	hog.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());//opencv中默认的训练数据
+
+	vector< Rect > detections;
+	vector< double > foundWeights;
+
+	hog.detectMultiScale(img, detections, foundWeights);//设置检测的相关参数及返回数据
+														//hog.detectMultiScale(img, detections, 0, Size(8, 8), Size(32, 32), 1.05, 2);
+	for (size_t j = 0; j < detections.size(); j++)
+	{
+		if (foundWeights[j] < 1) continue; //清楚权值较小的检测窗口  
+		Scalar color = Scalar(0, foundWeights[j] * foundWeights[j] * 200, 0);
+		rectangle(img, detections[j], color, img.cols / 400 + 1);
+	}
+
+	imshow("human", img);
+}
+
+void outRect(Mat &src) {
+
 }
