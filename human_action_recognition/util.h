@@ -13,6 +13,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <queue>
 
 using namespace std;
 using namespace cv;
@@ -21,7 +22,7 @@ void ContrastAndBright(Mat &src, Mat &dst, double alpha, double beta);//增强对比
 
 void srcAmend(Mat &src);
 
-void bgAmend(Mat &frame);
+double bgAmend(Mat &frame);
 
 Mat getApartFrame(Mat &src, Mat &mask);
 

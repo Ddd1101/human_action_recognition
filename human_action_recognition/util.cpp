@@ -3,6 +3,7 @@
 
 Mat element3 = getStructuringElement(MORPH_RECT, Size(3, 3));
 Mat element5 = getStructuringElement(MORPH_RECT, Size(5, 5));
+Mat element7 = getStructuringElement(MORPH_RECT, Size(7, 7));
 
 void ContrastAndBright(Mat &src, Mat &dst, double alpha, double beta) {
 	// 执行变换 new_image(i,j) = alpha    * image(i,j) + beta
@@ -24,16 +25,19 @@ void srcAmend(Mat &src) {
 
 	//增加对比度
 	tmp = Mat::zeros(src.size(), src.type());
-	//ContrastAndBright(src, tmp, 1.5, 50);
-	//src = tmp;
+	ContrastAndBright(src, tmp, 1.3, 0);
+	src = tmp;
 }
 
-void bgAmend(Mat &mask) {
+double bgAmend(Mat &mask) {
+	Rect boundRect;
 	Mat tmp;
+	double result=0;
 	//这两个操作就是先去噪点，再把空洞填充起来
-	morphologyEx(mask, tmp, MORPH_OPEN, element5);//开运算=腐蚀+膨胀
-	morphologyEx(tmp, tmp, MORPH_CLOSE, element5);//闭运算=膨胀+腐蚀
-	dilate(tmp, tmp, element5);
+	morphologyEx(mask, tmp, MORPH_OPEN, element7);//开运算=腐蚀+膨胀
+	//dilate(tmp, tmp, element5);
+	morphologyEx(tmp, tmp, MORPH_CLOSE, element7);//闭运算=膨胀+腐蚀
+	//dilate(tmp, tmp, element5);
 	medianBlur(tmp, tmp, 5);//中值滤波
 	mask.copyTo(tmp);
 	//去掉人体外的其他部分
@@ -42,38 +46,67 @@ void bgAmend(Mat &mask) {
 	findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
 	int max = 0;
 	vector<vector<Point>> ::iterator it;
-	for (it = contours.begin(); it != contours.end();)
-	{
-		if (max < it->size())
+	if (contours.size()>0) {
+		for (it = contours.begin(); it != contours.end();)
 		{
-			max = it->size();
+			boundRect = boundingRect(Mat(*it));
+			if ((boundRect.y + boundRect.height / 2) < (mask.rows / 6)) {
+				it=contours.erase(it);
+			}
+			else {
+				if (max < it->size())
+				{
+					max = it->size();
+				}
+				it++;
+			}
 		}
-		it++;
 	}
-	//std::cout << max << endl;
-	/*for (it = contours.begin(); it != contours.end();)
-	{
-		if (it->size() != max)
+	if (contours.size()>0) {
+		for (it = contours.begin(); it != contours.end();)
 		{
-			it = contours.erase(it);
+			if (it->size() != max)
+			{
+				it = contours.erase(it);
+			}
+			else
+			{
+				it++;
+			}
 		}
-		else
-		{
-			it++;
-		}
-	}*/
+	}
 	//cout << contours.size() << endl;
 	//将查找到的轮廓绘制到掩码
 	Mat mask2(tmp.size(), CV_8U, Scalar(0));
 	drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
+	medianBlur(mask2, mask2, 5);//中值滤波
 
-	medianBlur(mask2, mask2, 7);//中值滤波
+    //重心
+	double top, bottom;
+	if (contours.size() == 1) {
+		top = bottom = 0;
+		IplImage tmp = IplImage(mask);
+		CvPoint center;
+		double m00, m10, m01;
+		CvMoments moment;
+		cvMoments((CvArr*)&tmp, &moment, 1);
+		m00 = cvGetSpatialMoment(&moment, 0, 0);
+		m10 = cvGetSpatialMoment(&moment, 1, 0);
+		m01 = cvGetSpatialMoment(&moment, 0, 1);
+		center.x = (int)(m10 / m00);
+		center.y = (int)(m01 / m00);
+		boundRect = boundingRect(Mat(contours[0]));
+		top = boundRect.y;
+		bottom = boundRect.y + boundRect.height;
+		//cout << center.x << " -- " << center.y << " -- " << top << " -- " << bottom << " -- " << (bottom - center.y) / boundRect.height ;
+		result = (bottom - center.y) / boundRect.height;
+		//cout << " -- " << result << endl;
+	}
 
-	//RemoveSmallRegion(tmp, tmp, 20, 1, 0);
 	mask2.copyTo(mask);
 
 	threshold(mask, mask, 130, 255, cv::THRESH_BINARY);//二值化处理
-
+	return result;
 }
 
 Mat getApartFrame(Mat &src, Mat &mask) {
