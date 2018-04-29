@@ -31,8 +31,10 @@ void srcAmend(Mat &src) {
 void bgAmend(Mat &mask) {
 	Mat tmp;
 	//这两个操作就是先去噪点，再把空洞填充起来
-	//morphologyEx(mask, tmp, MORPH_OPEN, element5);//开运算=腐蚀+膨胀
-	//morphologyEx(tmp, tmp, MORPH_CLOSE, element5);//闭运算=膨胀+腐蚀
+	morphologyEx(mask, tmp, MORPH_OPEN, element5);//开运算=腐蚀+膨胀
+	morphologyEx(tmp, tmp, MORPH_CLOSE, element5);//闭运算=膨胀+腐蚀
+	dilate(tmp, tmp, element5);
+	medianBlur(tmp, tmp, 5);//中值滤波
 	mask.copyTo(tmp);
 	//去掉人体外的其他部分
 	vector<vector<Point>> contours;
@@ -49,7 +51,7 @@ void bgAmend(Mat &mask) {
 		it++;
 	}
 	//std::cout << max << endl;
-	for (it = contours.begin(); it != contours.end();)
+	/*for (it = contours.begin(); it != contours.end();)
 	{
 		if (it->size() != max)
 		{
@@ -59,13 +61,13 @@ void bgAmend(Mat &mask) {
 		{
 			it++;
 		}
-	}
+	}*/
 	//cout << contours.size() << endl;
 	//将查找到的轮廓绘制到掩码
 	Mat mask2(tmp.size(), CV_8U, Scalar(0));
 	drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
 
-	medianBlur(mask2, mask2, 3);//中值滤波
+	medianBlur(mask2, mask2, 7);//中值滤波
 
 	//RemoveSmallRegion(tmp, tmp, 20, 1, 0);
 	mask2.copyTo(mask);
