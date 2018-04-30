@@ -29,7 +29,7 @@ typedef vector<Point> contour_t;
 int main() {
 	//¶ÁÈ¡Í¼Ïñ
 	//string FilePath = "C:\\dataset\\pos\\video\\3.avi";//ÊÓÆµÂ·¾¶
-	string FilePath = "C:\\dataset\\pos\\2";
+	string FilePath = "C:\\dataset\\pos\\30";
 	vector< String > files;
 	glob(FilePath, files);
 	queue<double> points[80];
@@ -113,7 +113,7 @@ int main() {
 		imshow("traits",traits);
 		imshow("mask", mask);
 		imshow("src", src);
-		waitKey(1000);
+		waitKey(10);
 
 
 		//vibe
