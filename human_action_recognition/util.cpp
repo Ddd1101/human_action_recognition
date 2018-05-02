@@ -35,7 +35,7 @@ double bgAmend(Mat &mask) {
 	double result = 0;
 	//这两个操作就是先去噪点，再把空洞填充起来
 	morphologyEx(mask, mask, MORPH_OPEN, element7);//开运算=腐蚀+膨胀
-	//dilate(tmp, tmp, element5);
+	dilate(mask, mask, element3);
 	morphologyEx(mask, mask, MORPH_CLOSE, element7);//闭运算=膨胀+腐蚀
 	medianBlur(mask, mask, 3);//中值滤波
 	//去掉人体外的其他部分
@@ -44,7 +44,7 @@ double bgAmend(Mat &mask) {
 	findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
 	int max = 0;
 	vector<vector<Point>> ::iterator it;
-	if (contours.size() > 0) {
+	/*if (contours.size() > 0) {
 		for (it = contours.begin(); it != contours.end();)
 		{
 			boundRect = boundingRect(Mat(*it));
@@ -60,7 +60,7 @@ double bgAmend(Mat &mask) {
 			}
 		}
 	}
-	/*if (contours.size()>0) {
+	if (contours.size()>0) {
 		for (it = contours.begin(); it != contours.end();)
 		{
 			if (it->size() != max)

@@ -17,9 +17,6 @@
 //本工程
 #include "util.h"
 #include "ViBe.h"
-//#include "ImageSegmentation.h"
-//#include "BodyDetect.h"
-//#include "Body.h"
 
 using namespace cv;
 using namespace std;
@@ -29,14 +26,14 @@ typedef vector<Point> contour_t;
 int main() {
 	//读取图像
 	//string FilePath = "C:\\dataset\\pos\\video\\3.avi";//视频路径
-	string FilePath = "C:\\dataset\\pos\\1";
+	string FilePath = "C:\\dataset\\dataset\\pos\\8";
 	vector< String > files;
 	glob(FilePath, files);
 	queue<double> points[80];
 	//Mat traits;
-	/*//读取视频
+	//读取视频
 	VideoCapture capture(FilePath);
-	if (!capture.isOpened()) {
+	/*if (!capture.isOpened()) {
 		cout << "Can't open the video!" << endl;
 		return  1;
 	}
@@ -72,13 +69,13 @@ int main() {
 			break;
 		}*/
 		src = imread(files[count]);
-		cvtColor(src, src, COLOR_RGB2GRAY);
+		//cvtColor(src, src, COLOR_RGB2GRAY);
 		if (src.empty() == 1) {
 			break;
 		}
 		DWORD startTime = GetCurrentTime();//开始时间
 
-		resize(src, src, Size(src.cols * 2, src.rows * 2), 0, 0, INTER_LINEAR);//图像大小变化
+		//resize(src, src, Size(src.cols / 2, src.rows / 2), 0, 0, INTER_LINEAR);//图像大小变化
 
 		//自适应混合高斯背景建模的背景减除法
 		//图像前景提取处理
