@@ -77,8 +77,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\opencv\contribute\mybuild\install\include;C:\opencv\contribute\mybuild\install\include\opencv;C:\opencv\contribute\mybuild\install\include\opencv2;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\opencv\contribute\mybuild\install\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\opencv\contribute\mybuild\install\include;C:\opencv\contribute\mybuild\install\include\opencv;C:\opencv\contribute\mybuild\install\include\opencv2;C:\Program Files %28x86%29\Windows Kits\10\Include\10.0.16299.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\opencv\contribute\mybuild\install\x64\vc15\lib;C:\Program Files %28x86%29\Windows Kits\10\Lib\10.0.16299.0\ucrt\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

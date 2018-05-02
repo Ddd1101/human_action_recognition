@@ -31,27 +31,25 @@ void srcAmend(Mat &src) {
 
 double bgAmend(Mat &mask) {
 	Rect boundRect;
-	Mat tmp;
-	double result=0;
+	//Mat tmp;
+	double result = 0;
 	//这两个操作就是先去噪点，再把空洞填充起来
-	morphologyEx(mask, tmp, MORPH_OPEN, element7);//开运算=腐蚀+膨胀
+	morphologyEx(mask, mask, MORPH_OPEN, element7);//开运算=腐蚀+膨胀
 	//dilate(tmp, tmp, element5);
-	morphologyEx(tmp, tmp, MORPH_CLOSE, element7);//闭运算=膨胀+腐蚀
-	//dilate(tmp, tmp, element5);
-	medianBlur(tmp, tmp, 5);//中值滤波
-	mask.copyTo(tmp);
+	morphologyEx(mask, mask, MORPH_CLOSE, element7);//闭运算=膨胀+腐蚀
+	medianBlur(mask, mask, 3);//中值滤波
 	//去掉人体外的其他部分
 	vector<vector<Point>> contours;
 	Mat contours_src = mask.clone();
 	findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
 	int max = 0;
 	vector<vector<Point>> ::iterator it;
-	if (contours.size()>0) {
+	if (contours.size() > 0) {
 		for (it = contours.begin(); it != contours.end();)
 		{
 			boundRect = boundingRect(Mat(*it));
 			if ((boundRect.y + boundRect.height / 2) < (mask.rows / 6)) {
-				it=contours.erase(it);
+				it = contours.erase(it);
 			}
 			else {
 				if (max < it->size())
@@ -62,7 +60,7 @@ double bgAmend(Mat &mask) {
 			}
 		}
 	}
-	if (contours.size()>0) {
+	/*if (contours.size()>0) {
 		for (it = contours.begin(); it != contours.end();)
 		{
 			if (it->size() != max)
@@ -75,15 +73,14 @@ double bgAmend(Mat &mask) {
 			}
 		}
 	}
-	//cout << contours.size() << endl;
 	//将查找到的轮廓绘制到掩码
 	Mat mask2(tmp.size(), CV_8U, Scalar(0));
 	drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
-	medianBlur(mask2, mask2, 5);//中值滤波
+	medianBlur(mask2, mask2, 5);//中值滤波*/
 
-    //重心
+	//重心
 	double top, bottom;
-	if (contours.size() == 1) {
+	if (contours.size()>0) {
 		top = bottom = 0;
 		IplImage tmp = IplImage(mask);
 		CvPoint center;
@@ -102,10 +99,31 @@ double bgAmend(Mat &mask) {
 		result = (bottom - center.y) / boundRect.height;
 		//cout << " -- " << result << endl;
 	}
-
-	mask2.copyTo(mask);
+    //mask2.copyTo(mask);
 
 	threshold(mask, mask, 130, 255, cv::THRESH_BINARY);//二值化处理
+	return result;
+}
+
+double centerPoint(Mat mask, vector<vector<Point>> contours) {
+	double result;
+	Rect boundRect;
+	double top, bottom;
+	top = bottom = 0;
+	IplImage tmp = IplImage(mask);
+	CvPoint center;
+	double m00, m10, m01;
+	CvMoments moment;
+	cvMoments((CvArr*)&tmp, &moment, 1);
+	m00 = cvGetSpatialMoment(&moment, 0, 0);
+	m10 = cvGetSpatialMoment(&moment, 1, 0);
+	m01 = cvGetSpatialMoment(&moment, 0, 1);
+	center.x = (int)(m10 / m00);
+	center.y = (int)(m01 / m00);
+	boundRect = boundingRect(Mat(contours[0]));
+	top = boundRect.y;
+	bottom = boundRect.y + boundRect.height;
+	result = (bottom - center.y) / boundRect.height;
 	return result;
 }
 
