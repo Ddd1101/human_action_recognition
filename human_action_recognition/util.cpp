@@ -29,58 +29,34 @@ void srcAmend(Mat &src) {
 	src = tmp;
 }
 
-double bgAmend(Mat &mask) {
+Wicket bgAmend(Mat &mask) {
 	Rect boundRect;
-	//Mat tmp;
-	double result = 0;
+	Wicket result ;
 	//这两个操作就是先去噪点，再把空洞填充起来
-	morphologyEx(mask, mask, MORPH_OPEN, element7);//开运算=腐蚀+膨胀
-	dilate(mask, mask, element3);
-	morphologyEx(mask, mask, MORPH_CLOSE, element7);//闭运算=膨胀+腐蚀
+	morphologyEx(mask, mask, MORPH_OPEN, element5);//开运算=腐蚀+膨胀
+	//dilate(mask, mask, element3);
+	morphologyEx(mask, mask, MORPH_CLOSE, element5);//闭运算=膨胀+腐蚀
 	medianBlur(mask, mask, 3);//中值滤波
 	//去掉人体外的其他部分
 	vector<vector<Point>> contours;
 	Mat contours_src = mask.clone();
 	findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
-	int max = 0;
+	sort(contours.begin(), contours.end(), ContoursSortFun);
+	Mat toMask(480, 640, CV_8UC3, Scalar(0, 0, 0));//创建一个全黑的图片
 	vector<vector<Point>> ::iterator it;
-	/*if (contours.size() > 0) {
-		for (it = contours.begin(); it != contours.end();)
-		{
-			boundRect = boundingRect(Mat(*it));
-			if ((boundRect.y + boundRect.height / 2) < (mask.rows / 6)) {
-				it = contours.erase(it);
-			}
-			else {
-				if (max < it->size())
-				{
-					max = it->size();
-				}
-				it++;
-			}
-		}
-	}
-	if (contours.size()>0) {
-		for (it = contours.begin(); it != contours.end();)
-		{
-			if (it->size() != max)
-			{
-				it = contours.erase(it);
-			}
-			else
-			{
-				it++;
-			}
-		}
-	}
-	//将查找到的轮廓绘制到掩码
-	Mat mask2(tmp.size(), CV_8U, Scalar(0));
-	drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
-	medianBlur(mask2, mask2, 5);//中值滤波*/
 
 	//重心
 	double top, bottom;
-	if (contours.size()>0) {
+	double s;
+	if (contours.size() > 0) {
+		s = (double)contourArea(contours[0], true)*(-1);
+		if (s < 3000) {
+			cvtColor(toMask, mask, CV_BGR2GRAY);
+			return result;
+		}
+		result.isEx = 1;
+		drawContours(toMask, contours, 0, Scalar(255, 255, 255), -1);
+		cvtColor(toMask, mask, CV_BGR2GRAY);
 		top = bottom = 0;
 		IplImage tmp = IplImage(mask);
 		CvPoint center;
@@ -95,14 +71,23 @@ double bgAmend(Mat &mask) {
 		boundRect = boundingRect(Mat(contours[0]));
 		top = boundRect.y;
 		bottom = boundRect.y + boundRect.height;
+		result.x = boundRect.x;
+		result.y = boundRect.y;
+		result.height = boundRect.height;
+		result.width = boundRect.width;
 		//cout << center.x << " -- " << center.y << " -- " << top << " -- " << bottom << " -- " << (bottom - center.y) / boundRect.height ;
-		result = (bottom - center.y) / boundRect.height;
+		result.core = (bottom - center.y) / boundRect.height;
+		rectangle(mask, Rect(boundRect.x, boundRect.y, boundRect.width, boundRect.height), Scalar(255, 255, 255), 1, 8);
 		//cout << " -- " << result << endl;
 	}
-    //mask2.copyTo(mask);
+	//mask2.copyTo(mask);
 
-	threshold(mask, mask, 130, 255, cv::THRESH_BINARY);//二值化处理
+	//threshold(mask, mask, 130, 255, cv::THRESH_BINARY);//二值化处理
 	return result;
+}
+
+bool ContoursSortFun(vector<cv::Point> contour1, vector<cv::Point> contour2) {
+	return (contour1.size() > contour2.size());
 }
 
 double centerPoint(Mat mask, vector<vector<Point>> contours) {
@@ -397,8 +382,4 @@ void humanRecognition(Mat img) {
 	}
 
 	imshow("human", img);
-}
-
-void outRect(Mat &src) {
-
 }
