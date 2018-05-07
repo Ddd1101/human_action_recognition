@@ -77,12 +77,8 @@ Wicket bgAmend(Mat &mask) {
 		result.width = boundRect.width;
 		//cout << center.x << " -- " << center.y << " -- " << top << " -- " << bottom << " -- " << (bottom - center.y) / boundRect.height ;
 		result.core = (bottom - center.y) / boundRect.height;
-		rectangle(mask, Rect(boundRect.x, boundRect.y, boundRect.width, boundRect.height), Scalar(255, 255, 255), 1, 8);
-		//cout << " -- " << result << endl;
+		//rectangle(mask, Rect(boundRect.x, boundRect.y, boundRect.width, boundRect.height), Scalar(255, 255, 255), 1, 8);
 	}
-	//mask2.copyTo(mask);
-
-	//threshold(mask, mask, 130, 255, cv::THRESH_BINARY);//二值化处理
 	return result;
 }
 

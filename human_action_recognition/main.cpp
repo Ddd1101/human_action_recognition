@@ -104,17 +104,17 @@ int main() {
 		double tmpIn;
 		//traits.create(480, 640, CV_8UC3, Scalar(0, 0, 0));
 		Mat traits(480, 640, CV_8UC3, Scalar(0, 0, 0));//创建一个全黑的图片
-		for (int i = 0; i < points->size(); i++) {
+		/*for (int i = 0; i < points->size(); i++) {
 			tmp.x = (i + 1) * 8;
 			tmp.y = points->front();
 			points->pop();
 			points->push(tmp.y);
 			//cout << tmp.x << " -- " << tmp.y << endl;
 			circle(traits, tmp, 3, cv::Scalar(0, 255, 0));
-		}
+		}*/
 
 		//稀疏光流特征
-		Mat src0 = imread(files2[count++], CV_LOAD_IMAGE_COLOR);
+		/*Mat src0 = imread(files2[count++], CV_LOAD_IMAGE_COLOR);
 		Mat src1 = imread(files2[count], CV_LOAD_IMAGE_COLOR);
 		cvtColor(src0, gray0, CV_BGR2GRAY);
 		goodFeaturesToTrack(gray0, corners0, corner_count, 0.01, 5, Mat(), 3, false, 0.04);
@@ -123,7 +123,7 @@ int main() {
 		goodFeaturesToTrack(gray1, corners1, corner_count, 0.01, 5, Mat(), 3, false, 0.04);
 		cornerSubPix(gray1, corners1, Size(10, 10), Size(-1, -1), TermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03));
 		vector<Point2f>::iterator it;
-		src = Mat(480, 640, CV_8UC3, Scalar(0, 0, 0));
+		
 		for (it = corners0.begin(); it != corners0.end(); it++)
 		{
 			circle(mask, *it, 1, Scalar(255, 255, 255), 1, 8, 0);
@@ -131,22 +131,29 @@ int main() {
 		for (it = corners1.begin(); it != corners1.end(); it++)
 		{
 			circle(mask, *it, 1, Scalar(255, 255, 255), 1, 8, 0);
-		}
+		}*/
 		
-		Mat trait2;
-		if (wicket.isEx==1) {
+
+		//特征切割
+		/*Mat trait2;
+		if (wicket.isEx == 1) {
 			Rect rect(wicket.x, wicket.y, wicket.width, wicket.height);
 			trait2 = mask(rect);
-			copyMakeBorder(trait2, trait2,(480-wicket.height)/2, (480 - wicket.height) / 2, (640 - wicket.width) / 2, (640 - wicket.width) / 2, BORDER_CONSTANT, Scalar(0,0,0));
+			copyMakeBorder(trait2, trait2, 480 - wicket.y, 480 - (wicket.y + wicket.height), 640 - wicket.x, 640 - (wicket.x + wicket.width), BORDER_CONSTANT, Scalar(0, 0, 0));
+			Mat traitTmp = Mat(wicket.height, wicket.width, CV_8U, Scalar(255, 255, 255));
+			copyMakeBorder(traitTmp, traitTmp, 480 - wicket.y, 480 - (wicket.y + wicket.height), 640 - wicket.x, 640 - (wicket.x + wicket.width), BORDER_CONSTANT, Scalar(0, 0, 0));
+			Mat traitTmp2;
+			traitTmp2.create(mask.size(), mask.type());
+			traitTmp2 = Scalar::all(0);
+			trait2.copyTo(traitTmp2, traitTmp);
+			imshow("tmp", traitTmp2);
 		}
 		else {
-			trait2=Mat(480, 640, CV_8UC3, Scalar(0, 0, 0));
-		}
-		imshow("traits",trait2);
+			trait2 = Mat(480, 640, CV_8U, Scalar(0, 0, 0));
+		}*/
 		imshow("mask", mask);
-		//imshow("src", src);
-		//imshow("src0", src0);
-
+		imshow("src", src);
+		count++;
 		//vibe
 		/*cvtColor(src, tmp, CV_BGR2GRAY);
 		if (count == 1) {
