@@ -146,10 +146,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="skeleton.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="ViBe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="skeleton.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="ViBe.h" />
   </ItemGroup>

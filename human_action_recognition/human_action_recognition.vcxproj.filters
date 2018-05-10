@@ -24,12 +24,18 @@
     <ClCompile Include="ViBe.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="skeleton.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ViBe.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="skeleton.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

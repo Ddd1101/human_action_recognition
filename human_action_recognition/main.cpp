@@ -25,22 +25,22 @@ typedef vector<Point> contour_t;
 
 int main() {
 	//读取图像
-	string FilePath = "C:\\dataset\\dataset\\pos\\1";
-	string FilePath2 = "C:\\dataset\\pos\\1";
+	string FilePath = "C:\\dataset\\dataset\\neg\\1";
+	string FilePath2 = "C:\\dataset\\neg\\1";
 	vector< String > files;
 	vector< String > files2;
 	glob(FilePath, files);
 	glob(FilePath2, files2);
-	queue<double> points[80];
-	//读取视频
+	//queue<double> points[80];
+	////读取视频
 	//VideoCapture capture(FilePath);
-	/*if (!capture.isOpened()) {
-		cout << "Can't open the video!" << endl;
-		return  1;
-	}
-	//读取帧率
-	double rate = capture.get(CV_CAP_PROP_FPS);
-	int delay = 1000 / rate;*/
+	//if (!capture.isOpened()) {
+	//	cout << "Can't open the video!" << endl;
+	//	return  1;
+	//}
+	////读取帧率
+	//double rate = capture.get(CV_CAP_PROP_FPS);
+	//int delay = 1000 / rate;
 
 	Mat src;
 	Mat tmp;
@@ -71,26 +71,26 @@ int main() {
 	Mat element5 = getStructuringElement(MORPH_RECT, Size(5, 5));
 	int maxX = 0, maxY = 0;
 	while (count < files.size() - 1) {
-		//while(1){
-			/*if (!capture.read(src))
-			{
-				break;
-			}*/
+	//while (1) {
+		/*if (!capture.read(src))
+		{
+			break;
+		}*/
 		src = imread(files[count]);
 		cvtColor(src, src, COLOR_RGB2GRAY);
 		if (src.empty() == 1) {
 			break;
 		}
-		DWORD startTime = GetCurrentTime();//开始时间
+		//DWORD startTime = GetCurrentTime();//开始时间
 
 		//自适应混合高斯背景建模的背景减除法
 		//图像前景提取处理
 		//srcAmend(src);//增加对比度
-		//resize(src, src, Size(src.cols / 2, src.rows / 2), 0, 0, INTER_LINEAR);//图像大小变化
+		//resize(src, src, Size(src.cols * 2, src.rows * 2), 0, 0, INTER_LINEAR);//图像大小变化
 		bgsubstractor->apply(src, mask, -1);//得到前景灰度图
 		Wicket wicket = bgAmend(mask);
-		double point_tmp = wicket.core;//灰度图形态学处理
-		if (point_tmp >= 1) {
+		//double point_tmp = wicket.core;//灰度图形态学处理
+		/*if (point_tmp >= 1) {
 			point_tmp = 0;
 		}
 		if (points->size() < 80) {
@@ -99,11 +99,11 @@ int main() {
 		else {
 			points->pop();
 			points->push(point_tmp * 100 + 50);
-		}
-		Point tmp;
-		double tmpIn;
+		}*/
+		//Point tmp;
+		//double tmpIn;
 		//traits.create(480, 640, CV_8UC3, Scalar(0, 0, 0));
-		Mat traits(480, 640, CV_8UC3, Scalar(0, 0, 0));//创建一个全黑的图片
+		//Mat traits(480, 640, CV_8UC3, Scalar(0, 0, 0));//创建一个全黑的图片
 		/*for (int i = 0; i < points->size(); i++) {
 			tmp.x = (i + 1) * 8;
 			tmp.y = points->front();
@@ -123,7 +123,7 @@ int main() {
 		goodFeaturesToTrack(gray1, corners1, corner_count, 0.01, 5, Mat(), 3, false, 0.04);
 		cornerSubPix(gray1, corners1, Size(10, 10), Size(-1, -1), TermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03));
 		vector<Point2f>::iterator it;
-		
+
 		for (it = corners0.begin(); it != corners0.end(); it++)
 		{
 			circle(mask, *it, 1, Scalar(255, 255, 255), 1, 8, 0);
@@ -132,7 +132,7 @@ int main() {
 		{
 			circle(mask, *it, 1, Scalar(255, 255, 255), 1, 8, 0);
 		}*/
-		
+
 
 		//特征切割
 		/*Mat trait2;
@@ -153,10 +153,9 @@ int main() {
 		}*/
 		imshow("mask", mask);
 		imshow("src", src);
-		count++;
 		//vibe
 		/*cvtColor(src, tmp, CV_BGR2GRAY);
-		if (count == 1) {
+		if (count == 0) {
 			Vibe_Bgs.init(tmp);
 			Vibe_Bgs.processFirstFrame(tmp);
 			cout << "training gmm compelete" << endl;
@@ -171,15 +170,15 @@ int main() {
 			medianBlur(mask, mask, 3);//中值滤波
 
 			//重心
-			Rect boundRect;
-			vector<vector<Point>> contours;
-			Mat contours_src = mask.clone();
-			findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
-			int max = 0;
-			double top, bottom;
-			CvPoint center;
+			//Rect boundRect;
+			//vector<vector<Point>> contours;
+			//Mat contours_src = mask.clone();
+			//findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
+			//int max = 0;
+			//double top, bottom;
+			//CvPoint center;
 
-			vector<vector<Point>> ::iterator it;
+			/*vector<vector<Point>> ::iterator it;
 			if (contours.size()>0) {
 				for (it = contours.begin(); it != contours.end();)
 				{
@@ -210,61 +209,62 @@ int main() {
 				}
 			}
 
-			Mat mask2(tmp.size(), CV_8U, Scalar(0));
-			drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
-			mask2.copyTo(mask);
+			//Mat mask2(tmp.size(), CV_8U, Scalar(0));
+			//drawContours(mask2, contours, -1, Scalar(255), CV_FILLED);
+			//mask2.copyTo(mask);
 
-			if (contours.size() >= 1) {
-				top = bottom = 0;
-				IplImage tmp = IplImage(mask);
-				double m00, m10, m01;
-				CvMoments moment;
-				cvMoments((CvArr*)&tmp, &moment, 1);
-				m00 = cvGetSpatialMoment(&moment, 0, 0);
-				m10 = cvGetSpatialMoment(&moment, 1, 0);
-				m01 = cvGetSpatialMoment(&moment, 0, 1);
-				center.x = (int)(m10 / m00);
-				center.y = (int)(m01 / m00);
-				boundRect = boundingRect(Mat(contours[0]));
-				top = boundRect.y;
-				bottom = boundRect.y + boundRect.height;
-				cout << (bottom - center.y) / boundRect.height << endl;
-			}
-			else {
-				center.x = center.y = 0;
-			}
+			//if (contours.size() >= 1) {
+			//	top = bottom = 0;
+			//	IplImage tmp = IplImage(mask);
+			//	double m00, m10, m01;
+			//	CvMoments moment;
+			//	cvMoments((CvArr*)&tmp, &moment, 1);
+			//	m00 = cvGetSpatialMoment(&moment, 0, 0);
+			//	m10 = cvGetSpatialMoment(&moment, 1, 0);
+			//	m01 = cvGetSpatialMoment(&moment, 0, 1);
+			//	center.x = (int)(m10 / m00);
+			//	center.y = (int)(m01 / m00);
+			//	boundRect = boundingRect(Mat(contours[0]));
+			//	top = boundRect.y;
+			//	bottom = boundRect.y + boundRect.height;
+			//	cout << (bottom - center.y) / boundRect.height << endl;
+			//}
+			//else {
+			//	center.x = center.y = 0;
+			//}
 
-			double point_tmp = (bottom - center.y) / boundRect.height;//灰度图形态学处理
-			if (point_tmp >= 1) {
-				point_tmp = 0;
-			}
-			if (points->size() < 80) {
-				points->push(point_tmp * 100 + 50);
-			}
-			else {
-				points->pop();
-				points->push(point_tmp * 100 + 50);
-			}
+			//double point_tmp = (bottom - center.y) / boundRect.height;//灰度图形态学处理
+			//if (point_tmp >= 1) {
+			//	point_tmp = 0;
+			//}
+			//if (points->size() < 80) {
+			//	points->push(point_tmp * 100 + 50);
+			//}
+			//else {
+			//	points->pop();
+			//	points->push(point_tmp * 100 + 50);
+			//}
 
-			Point tmp;
-			double tmpIn;
-			Mat traits(480, 640, CV_8UC3, Scalar(0, 0, 0));//创建一个全黑的图片
-			for (int i = 0; i < points->size(); i++) {
-				tmp.x = (i + 1) * 8;
-				tmp.y = points->front();
-				points->pop();
-				points->push(tmp.y);
-				//cout << tmp.x << " -- " << tmp.y << endl;
-				circle(traits, tmp, 3, cv::Scalar(0, 255, 0));
-			}
+			//Point tmp;
+			//double tmpIn;
+			//Mat traits(480, 640, CV_8UC3, Scalar(0, 0, 0));//创建一个全黑的图片
+			//for (int i = 0; i < points->size(); i++) {
+			//	tmp.x = (i + 1) * 8;
+			//	tmp.y = points->front();
+			//	points->pop();
+			//	points->push(tmp.y);
+			//	//cout << tmp.x << " -- " << tmp.y << endl;
+			//	circle(traits, tmp, 3, cv::Scalar(0, 255, 0));
+			//}
 
-			imshow("traits", traits);
-			imshow("mask", mask);
-			imshow("src", src);
-		}*/
-		waitKey(10);
+			//imshow("traits", traits);
+			/*imshow("mask", mask);
+			imshow("src", src);*/
+		//}
+		//count++;
+		waitKey(50);
+		count++;
 	}
 	//capture.release();
-	waitKey();
 	return 0;
 }
