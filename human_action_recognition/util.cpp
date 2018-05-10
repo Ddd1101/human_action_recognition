@@ -1,10 +1,9 @@
 #include "util.h"
-//#include "ImageSegmentation.h"
 
-Mat element3 = getStructuringElement(MORPH_RECT, Size(3, 3));
-Mat element5 = getStructuringElement(MORPH_RECT, Size(5, 5));
-Mat element7 = getStructuringElement(MORPH_RECT, Size(7, 7));
 
+Mat elem3 = getStructuringElement(MORPH_RECT, Size(3, 3));
+Mat elem5 = getStructuringElement(MORPH_RECT, Size(5, 5));
+Mat elem7 = getStructuringElement(MORPH_RECT, Size(7, 7));
 //对比度
 void ContrastAndBright(Mat &src, Mat &dst, double alpha, double beta) {
 	// 执行变换 new_image(i,j) = alpha    * image(i,j) + beta
@@ -30,14 +29,63 @@ void srcAmend(Mat &src) {
 	src = tmp;
 }
 
-Wicket bgAmend(Mat &mask) {
+void bgAmend(Mat &mask) {
 	Rect boundRect;
-	Wicket result ;
+	Wicket result;
 	//这两个操作就是先去噪点，再把空洞填充起来
-	morphologyEx(mask, mask, MORPH_OPEN, element5);//开运算=腐蚀+膨胀
+	morphologyEx(mask, mask, MORPH_OPEN, elem5);//开运算=腐蚀+膨胀
 	//dilate(mask, mask, element3);
-	morphologyEx(mask, mask, MORPH_CLOSE, element5);//闭运算=膨胀+腐蚀
+	morphologyEx(mask, mask, MORPH_CLOSE, elem5);//闭运算=膨胀+腐蚀
 	medianBlur(mask, mask, 5);//中值滤波
+}
+
+//去掉人体外的其他部分
+void filterBg(Mat &mask) {
+	vector<vector<Point>> contours;
+	Mat contours_src = mask.clone();
+	findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
+	sort(contours.begin(), contours.end(), ContoursSortFun);
+	Mat toMask(mask.size(), CV_8UC3, Scalar(0, 0, 0));//创建一个全黑的图片
+	vector<vector<Point>> ::iterator it;
+	if (contours.size() > 0 &&contours[0].size()>250) {
+		drawContours(toMask, contours, 0, Scalar(255, 255, 255), -1);
+		cvtColor(toMask, mask, CV_BGR2GRAY);
+	}
+	else {
+		toMask.copyTo(mask);
+	}
+}
+
+//去掉人体外的其他部分并得到外接矩阵
+Wicket filterBg_boundRect(Mat &mask) {
+	vector<vector<Point>> contours;
+	Rect boundRect;
+	Wicket result;
+	Mat contours_src = mask.clone();
+	findContours(contours_src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);//查找轮廓
+	sort(contours.begin(), contours.end(), ContoursSortFun);
+	Mat toMask(mask.size(), CV_8UC3, Scalar(0, 0, 0));//创建一个全黑的图片
+	vector<vector<Point>> ::iterator it;
+	if (contours.size() > 0 && contours[0].size()>250) {
+		drawContours(toMask, contours, 0, Scalar(255, 255, 255), -1);
+		cvtColor(toMask, mask, CV_BGR2GRAY);
+		boundRect = boundingRect(Mat(contours[0]));
+		result.isEx = 1;
+		result.x = boundRect.x;
+		result.y = boundRect.y;
+		result.height = boundRect.height;
+		result.width = boundRect.width;
+	}
+	else {
+		toMask.copyTo(mask);
+	}
+	return result;
+}
+
+//计算重心
+Wicket core(Mat mask) {
+	Wicket result;
+	Rect boundRect;
 	//去掉人体外的其他部分
 	vector<vector<Point>> contours;
 	Mat contours_src = mask.clone();
@@ -49,12 +97,7 @@ Wicket bgAmend(Mat &mask) {
 	//重心
 	double top, bottom;
 	double s;
-	/*if (contours.size() > 0) {
-		s = (double)contourArea(contours[0], true)*(-1);
-		if (s < 3000) {
-			cvtColor(toMask, mask, CV_BGR2GRAY);
-			return result;
-		}
+	if (contours.size() > 0 && contours[0].size()>250) {
 		result.isEx = 1;
 		drawContours(toMask, contours, 0, Scalar(255, 255, 255), -1);
 		cvtColor(toMask, mask, CV_BGR2GRAY);
@@ -79,7 +122,9 @@ Wicket bgAmend(Mat &mask) {
 		//cout << center.x << " -- " << center.y << " -- " << top << " -- " << bottom << " -- " << (bottom - center.y) / boundRect.height ;
 		result.core = (bottom - center.y) / boundRect.height;
 		//rectangle(mask, Rect(boundRect.x, boundRect.y, boundRect.width, boundRect.height), Scalar(255, 255, 255), 1, 8);
-	}*/
+		return result;
+	}
+	toMask.copyTo(mask);
 	return result;
 }
 

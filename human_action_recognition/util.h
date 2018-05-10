@@ -31,7 +31,7 @@ void ContrastAndBright(Mat &src, Mat &dst, double alpha, double beta);//增强对比
 
 void srcAmend(Mat &src);
 
-Wicket bgAmend(Mat &frame);
+void bgAmend(Mat &frame);
 
 bool ContoursSortFun(vector<cv::Point> contour1, vector<cv::Point> contour2);
 
@@ -41,4 +41,12 @@ void humanRecognition(Mat img);//人体检测
 
 void outRect(Mat &src);//外接矩形
 
+//去掉人体外的其他部分
+void filterBg(Mat &mask);
+
+//去掉人体外的其他部分并得到外接矩阵
+Wicket filterBg_boundRect(Mat &mask);
+
+//计算重心
+Wicket core(Mat mask);
 
