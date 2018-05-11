@@ -147,13 +147,19 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="skeleton.cpp" />
+    <ClCompile Include="train.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="ViBe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="skeleton.h" />
+    <ClInclude Include="train.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="ViBe.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="human_action_recognition.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
