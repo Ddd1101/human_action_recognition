@@ -50,3 +50,5 @@ Wicket filterBg_boundRect(Mat &mask);
 //¼ÆËãÖØÐÄ
 Wicket core(Mat mask);
 
+Mat mergeRow(Mat A, Mat B);
+

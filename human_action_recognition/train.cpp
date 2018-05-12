@@ -103,7 +103,6 @@ void myTrain() {
 
 	int a;
 	cin >> a;
-	return 0;
 }
 
 

@@ -199,5 +199,13 @@ void humanRecognition(Mat img) {
 	imshow("human", img);
 }
 
-//Vibe
+Mat mergeRow(cv::Mat A, cv::Mat B) {
+	int totalRows = A.rows + B.rows;
+	cv::Mat mergedDescriptors(totalRows, A.cols, A.type());
+	cv::Mat submat = mergedDescriptors.rowRange(0, A.rows);
+	A.copyTo(submat);
+	submat = mergedDescriptors.rowRange(A.rows, totalRows);
+	B.copyTo(submat);
+	return mergedDescriptors;
+}
 
