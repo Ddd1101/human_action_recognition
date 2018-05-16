@@ -259,3 +259,29 @@ Mat RegionGrow(Mat MatIn, int iGrowPoint, int iGrowJudge){//iGrowPoint为种子点的
 	}
 	return MatGrowCur;
 }
+
+void lightTrait(){//稀疏光流特征
+	
+	Mat src0;
+	Mat src1;
+	Mat gray0;
+	/*Mat gray1;
+	Mat src0 = imread(files2[count++], CV_LOAD_IMAGE_COLOR);
+	Mat src1 = imread(files2[count], CV_LOAD_IMAGE_COLOR);
+	cvtColor(src0, gray0, CV_BGR2GRAY);
+	goodFeaturesToTrack(gray0, corners0, corner_count, 0.01, 5, Mat(), 3, false, 0.04);
+	cornerSubPix(gray0, corners0, Size(10, 10), Size(-1, -1), TermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03));
+	cvtColor(src1, gray1, CV_BGR2GRAY);
+	goodFeaturesToTrack(gray1, corners1, corner_count, 0.01, 5, Mat(), 3, false, 0.04);
+	cornerSubPix(gray1, corners1, Size(10, 10), Size(-1, -1), TermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03));
+	vector<Point2f>::iterator it;
+
+	for (it = corners0.begin(); it != corners0.end(); it++)
+	{
+	circle(mask, *it, 1, Scalar(255, 255, 255), 1, 8, 0);
+	}
+	for (it = corners1.begin(); it != corners1.end(); it++)
+	{
+	circle(mask, *it, 1, Scalar(255, 255, 255), 1, 8, 0);
+	}*/
+}

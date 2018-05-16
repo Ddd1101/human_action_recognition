@@ -103,7 +103,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -150,6 +150,7 @@
     <ClCompile Include="train.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="ViBe.cpp" />
+    <ClCompile Include="ZernikeMoment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -157,6 +158,7 @@
     <ClInclude Include="train.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="ViBe.h" />
+    <ClInclude Include="ZernikeMoment.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="human_action_recognition.rc" />
