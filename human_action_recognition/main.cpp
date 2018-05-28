@@ -9,6 +9,7 @@
 #include <opencv2/ml.hpp>  
 //C
 #include <stdio.h>
+#include<windows.h>
 //C++
 #include <iostream>
 #include <sstream>
@@ -32,10 +33,12 @@ using namespace cv::ml;
 #pragma comment(lib,"shlwapi.lib")
 
 
+
 int main() {
 	Mat elem3 = getStructuringElement(MORPH_RECT, Size(3, 3));
 	Mat elem5 = getStructuringElement(MORPH_RECT, Size(5, 5));
 	Mat elem7 = getStructuringElement(MORPH_RECT, Size(7, 7));
+
 	//读写文件
 	//string fileName;
 	string dataName;
@@ -47,14 +50,14 @@ int main() {
 	//{
 	//	CreateDirectory(savePath, NULL);
 	//}
-	dataName = "C:\\dataset\\svm2\\test\\pos\\1";
+	dataName = "C:\\dataset\\src\\pos\\1";
 	//outFile.open(fileName, ios::app); // 打开模式可省略  
 	//读取图像
 	string FilePath = dataName;
 	VideoCapture capture(FilePath);
 	vector< String > files;
 	bool isVideo = 0;
-	bool isGauss = 0;
+	bool isGauss = 1;
 
 
 	if (isVideo == 1) {
@@ -166,8 +169,23 @@ int main() {
 			//自适应混合高斯背景建模的背景减除法
 			//图像前景提取处理
 			//srcAmend(src);//增加对比度
-			resize(src, src, Size(src.cols * 0.5, src.rows * 0.5), 0, 0, INTER_LINEAR);//图像大小变化
-			bgsubstractor->apply(src, mask, -1);//得到前景灰度图
+			//resize(src, src, Size(src.cols * 0.5, src.rows * 0.5), 0, 0, INTER_LINEAR);//图像大小变化
+			for (int i = 0; i < files.size();i++) {
+				src = imread(files[i]);
+				cvtColor(src, src, COLOR_RGB2GRAY);
+				string name = "C:\\dataset\\src\\gray\\";
+				name += to_string(i);
+				name += ".png";
+				imwrite(name,src);
+				bgsubstractor->apply(src, mask, -1);//得到前景灰度图
+				name= "C:\\dataset\\src\\guss\\";
+				name += to_string(i);
+				name += ".png";
+				imwrite(name, mask);
+			}
+			//bgsubstractor->apply(src, mask, -1);//得到前景灰度图
+			cout << "finish" << endl;
+			return 0;
 			bgAmend(mask);
 		}
 		else {//vibe
@@ -190,15 +208,10 @@ int main() {
 
 		Wicket bound = filterBg_boundRect(mask);
 
-		/*cout << fixed << setw(4) << double(bound.width) / double(bound.height) << " -- ";
-		cout << bound.width * bound.height << " -- ";
-		cout << bound.width + bound.height << " -- ";
-		cout << bound.height << endl;*/
 		bool isStand = 0;
 
 		//svm1-站姿检测
 		if (bound.isEx == 1) {
-			//outFile << count + 1 << ',' << double(bound.width) / double(bound.height) << ',' << bound.width * bound.height << ',' << bound.width + bound.height << ',' << bound.height << endl;
 			float labels[4] = { float(bound.width) / float(bound.height), bound.width * bound.height, bound.width + bound.height, bound.height };
 			Mat test(1, 4, CV_32F, labels);
 			float response = svm1->predict(test);
